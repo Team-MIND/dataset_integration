@@ -4,18 +4,25 @@ PyTorch."""
 import torch
 import torchvision
 from torchvision import transforms
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import re
 import os
 import warnings
 import nibabel as nib
 
+################################################################################
+# General Dataset
+################################################################################
+
 
 class TorchBIDS(Dataset):
 
-  def __init__(self, root_dir, search_path, id_to_labels={}, scan_type="nii",
-    allow_multiple_files=False, transforms=None):
+  def __init__(self, root_dir, search_path, id_to_labels=None, scan_type="nii",
+    allow_multiple_files=False, transforms=None, classes=None):
     """Generalized torch dataset to use with neuroimaging data in BIDS format.
+
+    Subclass datasets can inherit from this class if they overwrite the
+    _get_label_map() method.
 
     Args:
       root_dir: Path to root directory of BIDS dataset (directory containing
@@ -43,12 +50,35 @@ class TorchBIDS(Dataset):
         of a particular subject, so is set to False by default.
       transforms: Either a single tensor transformation or a list of them. Lists
         of transforms will be composed using torchvision.transform.Compose.
+      classes: List of desired classes. If not None, subjects whose class labels
+        are not in this set are ignored.
     """
 
     super(TorchBIDS, self).__init__()
 
+    self.root_dir = root_dir
+
     # Add subject_id->label mapping as attribute
     self.id_to_labels = id_to_labels
+    # Overwrite in case of subclass implementing alternative method
+    self.id_to_labels = self._get_label_map()
+    assert self.id_to_labels is not None, (
+      "ID->Label mapping must be provided as an argument during "
+      "TorchBIDS instaniation, or _get_label_map() must be overridden "
+      "by subclass!"
+    )
+
+    # Determine list of distinct classes if list of predefined classes is not
+    # passed
+    if classes:
+      # Filter id->label mapping
+      self.id_to_labels = {k:self.id_to_labels[k] for k in 
+        self.id_to_labels.keys() if self.id_to_labels[k] in classes}
+      self.classes = classes
+    else:
+      # Extract all unique classes in id->label mapping
+      self.classes = list(set([
+        self.id_to_labels[k] for k in self.id_to_labels.keys()]))
 
     self.scan_type = scan_type
     self.allow_multiple_files = allow_multiple_files
@@ -153,11 +183,19 @@ class TorchBIDS(Dataset):
     return scan_data
 
 
+  def _get_label_map(self):
+    """Returns a dict whose keys are all desired subject ids and values are
+    corresponding labels.
+    """
+
+    return self.id_to_labels
+
+
+
 def main():
-  dataset = TorchBIDS("../fmri_dataset_adhd_autism/imagingcollection01",
-    r'.*\.nii\.gz', id_to_labels={'NDAR_INVKA130YAJ':'Test',
-    'NDARBF360EMN':'Test'})
-  print(dataset[0])
+  # Nothing to see here
+  pass
+  
 
 if __name__ == "__main__":
   main()
