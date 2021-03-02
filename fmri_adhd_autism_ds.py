@@ -11,7 +11,10 @@ class FMRI_AA(TorchBIDS):
 
   def __init__(self, root_dir, search_path, allow_multiple_files=False, 
     transforms=None, classes=None):
-    """Inherits from TorchBIDS to load fMRI adhd-autism NDA dataset."""
+    """Inherits from TorchBIDS to load fMRI adhd-autism NDA dataset.
+    
+    See full stufy at https://nda.nih.gov/edit_collection.html?id=1955.
+    """
 
     super(FMRI_AA, self).__init__(root_dir, search_path, scan_type="nii",
       allow_multiple_files=allow_multiple_files, transforms=transforms,
