@@ -13,23 +13,35 @@ class FMRI_AA(TorchBIDS):
     transforms=None, classes=None):
     """Inherits from TorchBIDS to load fMRI adhd-autism NDA dataset.
     
-    See full stufy at https://nda.nih.gov/edit_collection.html?id=1955.
+    See full study at https://nda.nih.gov/edit_collection.html?id=1955.
     """
 
     super(FMRI_AA, self).__init__(root_dir, search_path, scan_type="nii",
       allow_multiple_files=allow_multiple_files, transforms=transforms,
       classes=classes)
 
-  def _get_label_map(self):
+  def _get_label_map(self, labels=["Autism", "Nonspectrum"]):
     """Load mapping between labels of all desired subjects and their
     corresponding class labels."""
 
-    df = pd.read_csv(f"{self.root_dir}/../adhdrs01.txt", sep="\t")
+    df = pd.read_csv(f"{self.root_dir}/../ndar_subject01.txt", sep="\t")
 
+    # Keys are subject ids, values are phenotype labels
+    label_map = {}
+    for i in range(len(df)):
+      row = df.iloc[i]
+      sid = row["subjectkey"]
+      pt = row["phenotype_description"]
+
+      if sid not in label_map.keys() and pt in labels:
+        label_map[sid] = pt
+
+    return label_map
+    
 
 def main():
   dataset = FMRI_AA("../fmri_dataset_adhd_autism/imagingcollection01",
-    r'.*')
+    r'sub-.*/ses-.*/fmap/.*\.nii\.gz', allow_multiple_files=False)
 
 if __name__ == "__main__":
   main()

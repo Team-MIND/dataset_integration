@@ -86,6 +86,9 @@ class TorchBIDS(Dataset):
     # Create mapping from subject id to all desired files
     self.id_to_files = {}
 
+    # Prepend root dir to search path
+    self.search_path = "/".join([self.root_dir, search_path])
+
     # Search for appropriate files for each subject id in root directory
     for subject_id in self.id_to_labels.keys():
       # Search for appropriate directory
@@ -95,13 +98,11 @@ class TorchBIDS(Dataset):
         if os.path.isdir(path) and subject_id in subdir:
           # Traverse it for files
           for subdir, _, files in os.walk(path):
-            # Combine subdir with regex for desired file path
-            joined_re = re.compile("".join([subdir, "/", search_path]))
             for f in files:
               # If a file matching the specified regex is found, add it to
               # list of relevant files for this particular subject
               fpath = f"{subdir}/{f}"
-              if re.match(joined_re, fpath):
+              if re.match(self.search_path, fpath):
                 # Add file to list of relevant files for this subject,
                 # or raise error if disallowing multiple entries per subject
                 if (subject_id in self.id_to_files.keys() and not 
