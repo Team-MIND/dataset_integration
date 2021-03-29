@@ -31,6 +31,14 @@ class RandomFlips(object):
       x = torch.flip(x, dims = [2])
 
     return x
+
+class ToTensor(object):
+    def __call__(self, sample):
+        scan, label = sample
+        assert isinstance(scan, torch.FloatTensor)
+        label = torch.from_numpy(label).type(torch.LongTensor)
+        assert isinstance(label, torch.LongTensor)
+        return (scan, label)
         
 
 class ZScore(object):

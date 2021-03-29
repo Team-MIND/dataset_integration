@@ -9,6 +9,7 @@ import re
 import os
 import warnings
 import nibabel as nib
+from sklearn.model_selection import train_test_split
 
 ################################################################################
 # General Dataset
@@ -18,7 +19,7 @@ import nibabel as nib
 class TorchNI(Dataset):
 
   def __init__(self, root_dir, search_path, id_to_labels=None, scan_type="nii",
-    allow_multiple_files=False, transforms=None, classes=None):
+    allow_multiple_files=False, is_train=False, transforms=None, classes=None):
     """Generalized torch dataset to use with neuroimaging data in BIDS or
     DICOM format.
 
@@ -118,6 +119,14 @@ class TorchNI(Dataset):
           self.data.append((s, f, l))
       else:
         self.data.append((s, fs, l))
+    
+    #Split into train and test sets
+    if len(self.data) > 0:
+      X_train, X_test =train_test_split(data, test_size=.2, random_state=3)
+    if self.is_train:
+      self.data=X_train
+    else:
+      self.data=X_test
 
     # Compose transforms for loading scans
     self.transforms = transforms
