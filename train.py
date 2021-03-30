@@ -100,7 +100,7 @@ class Trainer:
             print("run with cpu")
             self.net = FullModel(n_classes=len(self.args.labels))
 
-        # create datasets, esnure splitting happens(TODO)
+        # create datasets
         self.trainset = FMRI_AA(root_dir=self.args.root_dir, search_path=self.args.tsv_path, is_train=True, transforms=[RandomFlips(), ToTensor()])
         self.testset = FMRI_AA(root_dir=self.args.root_dir, search_path=self.args.tsv_path, is_train=False, transforms=[ ToTensor()])
 
