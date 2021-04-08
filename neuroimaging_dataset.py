@@ -5,6 +5,7 @@ import torch
 import torchvision
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
+from pydicom import dcmread
 import re
 import os
 import warnings
@@ -156,6 +157,8 @@ class TorchNI(Dataset):
 
     if self.scan_type == "nii":
       return self.open_nii(scan)
+    if self.scan_type == "dcm":
+      return self.open_dcm(scan)
     else:
       raise ValueError(f"Unsupported scan type {self.scan_type}.")
 
@@ -168,6 +171,19 @@ class TorchNI(Dataset):
 
     # open thorugh nibabel use nib.load(pathname).get_data() to get array
     scan_data = torch.from_numpy(nib.load(scan).get_fdata())
+
+    if self.transforms:
+      return self.transforms(scan_data)
+    return scan_data
+
+
+  def open_dcm(self, scan):
+    """Open a scan given by a path to a dcm file.
+
+    Apply desired tensor transformations specified in dataset initialization.
+    """
+
+    scan_data = torch.from_numpy(dcmread(scan).pixel_array)
 
     if self.transforms:
       return self.transforms(scan_data)
