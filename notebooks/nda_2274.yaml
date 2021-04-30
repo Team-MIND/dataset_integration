@@ -1,0 +1,20 @@
+mode: 'NDA'
+dataset_params:
+    root_dir: 'FINAL'
+    data_dir: 'FINAL'
+    txt_files: ['master_table.csv']
+    data_dict:
+        subject_cols:
+            id: 'src_subject_id'
+            age: 'interview_age'
+        phenotype_cols:
+            phenotype: 'gps_g10'
+        join_cols: null
+        file_dict: null
+        dicom2nifti: False
+        deface: False
+    regex_dict: 
+        subject_regex: null
+        file_regex: null
+        file_extension: null
+    classes: ['1', '2', '3', '4']
