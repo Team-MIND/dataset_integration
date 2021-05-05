@@ -5,6 +5,7 @@ import torch
 import torchvision
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
+from pydicom import dcmread
 import re
 import os
 import warnings
@@ -162,8 +163,13 @@ class TorchNI(Dataset):
 
     if self.scan_type == "nii":
       return self.open_nii(scan)
+<<<<<<< HEAD:python/neuroimaging_dataset.py
     elif self.scan_type == "dicom":
       return self.open_dicom(scan)
+=======
+    if self.scan_type == "dcm":
+      return self.open_dcm(scan)
+>>>>>>> 40fddef7ee7c52ca32d597bc60ff8c1e2651c9a9:neuroimaging_dataset.py
     else:
       raise ValueError(f"Unsupported scan type {self.scan_type}.")
 
@@ -191,6 +197,19 @@ class TorchNI(Dataset):
     # TODO
     scan = pydicom.dcmread(scan)
     return scan
+
+
+  def open_dcm(self, scan):
+    """Open a scan given by a path to a dcm file.
+
+    Apply desired tensor transformations specified in dataset initialization.
+    """
+
+    scan_data = torch.from_numpy(dcmread(scan).pixel_array)
+
+    if self.transforms:
+      return self.transforms(scan_data)
+    return scan_data
 
 
   def _get_label_map(self):
