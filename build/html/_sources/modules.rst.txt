@@ -1,0 +1,9 @@
+python
+======
+
+.. toctree::
+   :maxdepth: 4
+
+   fmri_adhd_autism_ds
+   neuroimaging_dataset
+   transforms
